@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  email    String    @unique
+  name     String?
+  username String?   @unique
+  password String
+  role     Role      @default(PLAYER)
+  image    String?
+  reports  Reports[] @relation(name: "playerReport")
+  reported Reports[] @relation(name: "playerReported")
+  status   Status    @default(ONLINE)
+}
+
+model Reports {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  report           String
+  playerReport     Player? @relation(name: "playerReport", fields: [playerReportId], references: [id])
+  playerReported   Player? @relation(name: "playerReported", fields: [playerReportedId], references: [id])
+  playerReportedId String  @db.ObjectId
+  playerReportId   String  @db.ObjectId
+}
+
+enum Role {
+  PLAYER
+  GAME_MASTER
+  ADMIN
+}
+
+enum Status {
+  ONLINE
+  OFFLINE
+}
